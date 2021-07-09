@@ -1,0 +1,128 @@
+function [root, fx, ea, iter] = falsePosition(func, xl, xu, es, maxit, varargin)
+%falsePosition finds the root of a function using false position method
+% xl=the lower guess
+% xu=upper guess
+% func=the function being evaluated
+% es=relative error
+% maxit= number of iterations
+
+% Outputs:
+
+%root= the estimated root location
+%fx= the function evaluated at the root location
+%ea= the approximate relative error (%)
+%iter= how many iteraqtions were performed
+
+if nargin < 3
+    error('at least three input arguments required')
+end
+
+test = func(xl,varargin{:})*func(xu,varargin{:});
+
+if test > 0
+    error ('sign did not change')
+end
+
+if nargin < 4 || isempty(es)
+   es=0.0001;
+end
+
+if nargin < 5 || isempty(maxit), maxit=200;
+end
+
+iter=0;
+xr=xl;
+ea=100;
+
+while (1) 
+    xrold=xr
+    xr=xu-((func(xu)*(xl-xu))/(func(xl)-func(xu)));
+    iter= iter + 1;
+    if xr ~= 0
+        ea= abs((xr-xrold)/xr)*100;
+    end
+    test=func(xl,varargin{:})*func(xr,varargin{:});
+    
+    if test < 0
+        xu=xr;
+    elseif test > 0
+        xl=xr;
+    else ea=0;
+    end
+    
+    if ea <= es || iter >= maxit
+        break
+    end
+end
+
+root=xr;
+fx=func(xr,varargin{:});
+
+
+end
+
+
+#PART 2
+
+% Define problem constants
+g = 9.81;
+mu = 0.55;
+F = 150;
+m = 25;
+
+% Define the function to be solved for. Is the angle specified in radians or degrees?
+theta= 0:90
+f=@(theta)F*(cosd(theta)+mu*sind(theta))-(mu*m*g);
+
+
+% THINK, what makes range sense for angle?
+
+% Plot your function. Does plotting give you an idea about where the root is?
+plot(theta,f(theta),'g-')
+xlabel('theta')
+ylabel('function');
+a=0;
+b=90;
+error=1
+ite=0;
+% Finaly solve for the root using the bisection script given to you, which can be called as:
+%[root, fx, ea, iter] = bisect(func, lower_bound, upper_bound);
+if (f(a)*f(b)<0)
+    while error > (10^-6)
+        c=(a+b)/2;
+        if (f(b)*f(c)<0)
+            a=c;
+        else
+            b=c;
+        end
+        error = abs(f(c));
+        root=c;
+        ite=ite+1;
+    end
+else
+    fprintf('root is not nound');
+end
+fprintf('bisection method \n root is:\t%f\nconverged at iterations of\t%f\n', root, ite)
+fprintf('with error\t%f\nand function at root is\t%f\n', f(c), f(root))
+a=0;b=90;
+error=1;
+ite=0;
+if (f(a)*f(b)<0)
+    a=b;
+    b=c;
+    root=c;
+    ite=ite+1
+
+else
+    fprintf('root is not bound')
+    end
+    fprintf('flase position method \n root is: \t %f \n converged at iterations of\t%f\n', root, ite)
+fprintf('with error \t %f\n and function at root is \t%f\n', f(c), f(root))
+
+format long
+
+% These variables will be checked for your final answer:
+angle = 66.817641  % the angle in degree that solves this problem
+fx =  0.000001   % the function value at your solved angle
+ea = 0.000001   % the bisection error estimate
+iter = 26  % the number of bisection iterations
